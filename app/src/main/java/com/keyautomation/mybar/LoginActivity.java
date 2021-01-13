@@ -9,6 +9,8 @@ import android.os.Bundle;
 
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
@@ -29,9 +31,13 @@ public class LoginActivity extends AppCompatActivity {
 
         DatabaseHelper db = new DatabaseHelper(c, db_name, version);
 
-        List<Table> tavoli = DatabaseHelper.instance.getTablesList();
-        tavoli.forEach(t ->{
-            System.out.println("Table id : " + t.getID() + " posti : " + t.getChairs());
+        //Waiter primo = new Waiter("tom", "psw", new Date(System.nanoTime()), new Date(System.nanoTime()), 100);
+        //Waiter secondo = new Waiter("matt", "psw", new Date(System.nanoTime()), new Date(System.nanoTime()), 80);
+
+        List<Waiter> waiters = DatabaseHelper.instance.getWaitersList();
+        System.out.println("SIZE : " + waiters.size());
+        waiters.forEach(t ->{
+            System.out.println("Table id : " + t.getID() + " name : " + t.getName());//stampa solo il secondo (?)
         });
 
     }
