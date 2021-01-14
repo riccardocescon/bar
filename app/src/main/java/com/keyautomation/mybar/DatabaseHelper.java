@@ -3,6 +3,7 @@ package com.keyautomation.mybar;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -29,6 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         private static final String TB_Orders = "tb_orders";
         private static final String TB_Orders_Drinks = "tb_orders_drinks";
         private static final String TB_Orders_Waiters = "tb_orders_waiters";
+        private static final String TB_Orders_Tables = "tb_orders_tables";
         private static final String TB_Drinks = "tb_drinks";
         private static final String TB_Waiters = "tb_waiters";
     //endregion
@@ -71,6 +73,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             public static final String FLD_Orders___Waiters_FK_Waiter = "fk_waiter";
         //endregion
 
+        //region Order-Tables
+            public static final String FLD_Orders___Tables_FK_Order = "fk_order";
+            public static final String FLD_Orders___Tables_FK_Table = "fk_table";
+        //endregion
+
     //endregion
 
     //region Creazione Tabelle
@@ -84,8 +91,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         private static final String CREATE_TB_Orders_QUERY =
             "CREATE TABLE IF NOT EXISTS " + TB_Orders + " (" +
                     FLD_Orders_ID + " INTEGER  PRIMARY KEY , " +
-                    FLD_Orders_SERVED + " BOOLEAN ," +
-                    FLD_Orders_PAID + " BOOLEAN" +
+                    FLD_Orders_SERVED + " INTEGER ," +
+                    FLD_Orders_PAID + " INTEGER" +
                     ")";
 
         private static final String CREATE_TB_Drinks_QUERY =
@@ -118,6 +125,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     FLD_Orders___Waiters_FK_Waiter + " INTEGER " +
                     ")";
 
+        private static final String CREATE_TB_Orders___Tables_QUERY =
+            "CREATE TABLE IF NOT EXISTS " + TB_Orders_Tables + " (" +
+                    FLD_Orders___Tables_FK_Order + " INTEGER, " +
+                    FLD_Orders___Tables_FK_Table + " INTEGER " +
+                    ")";
+
     //endregion
 
     public DatabaseHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
@@ -136,7 +149,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
 
         createTables(db);
-
     }
 
     @Override
@@ -183,6 +195,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 return count;
             }
 
+            public synchronized Table getTableByOrder(String... whereClause){
+                SQLiteDatabase db = getReadableDatabase();
+                Cursor cursor;
+                Table table = null;
+                StringBuilder sqlQuery_fk_table = getSqlQuery(TB_Orders_Tables, whereClause);
+
+                cursor = db.rawQuery(sqlQuery_fk_table.toString(), null);
+
+                if (cursor.moveToFirst()) {
+                    Orders_Tables orders_tables = new Orders_Tables(cursor);
+
+                    StringBuilder sqlQuery = getSqlQuery(TB_Tables, FLD_Table_ID + " = " + orders_tables.getFkTable());
+
+                    cursor = db.rawQuery(sqlQuery.toString(), null);
+
+                    if (cursor.moveToFirst()) {
+
+                        table = new Table(cursor);
+                    }
+                }
+
+                close(cursor, db);
+                return table;
+            }
+
             //endregion
 
             //region Waiters
@@ -222,7 +259,119 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     return count;
                 }
 
+            //
+
+                public synchronized List<Drink> getDrinksByOrder(String... whereClause){
+                    SQLiteDatabase db = getReadableDatabase();
+                    Cursor cursor;
+                    List<Drink> drinks = new ArrayList<>();
+                    StringBuilder sqlQuery_fk_drink = getSqlQuery(TB_Orders_Drinks, whereClause);
+
+                    cursor = db.rawQuery(sqlQuery_fk_drink.toString(), null);
+                    Log.d("query", sqlQuery_fk_drink.toString());
+
+                    List<Orders_Drinks> od = getOrderDrinksList();
+                    od.forEach(e -> Log.d("o_fk_order", String.valueOf(e.getFkOrder())));
+
+
+                    if (cursor.moveToFirst()) {
+                        Orders_Drinks orders_drinks = new Orders_Drinks(cursor);
+
+                        StringBuilder sqlQuery = getSqlQuery(TB_Drinks, FLD_Drink_ID + " = " + orders_drinks.getFkDrink());
+
+                        //Log.d("query", sqlQuery.toString());
+
+                        cursor = db.rawQuery(sqlQuery.toString(), null);
+
+                        if (cursor.moveToFirst()) {
+                            do {
+                                Drink drink = new Drink(cursor);
+                                drinks.add(drink);
+                            } while (cursor.moveToNext());
+                        }
+                    }
+
+                    close(cursor, db);
+                    return drinks;
+                }
+
+                /*public synchronized List<Drink> getDrinksByOrder(String... whereClause){
+                    SQLiteDatabase db = getReadableDatabase();
+                    Cursor cursor;
+                    List<Drink> drinks = new ArrayList<>();
+                    StringBuilder sqlQuery = getSqlQuery(TB_Orders_Drinks, whereClause);
+
+                    cursor = db.rawQuery(sqlQuery.toString(), null);
+
+                    if (cursor.moveToFirst()) {
+                        Drink drink = new Drink(cursor);
+                        drinks.add(drink);
+                    }
+
+                    close(cursor, db);
+                    return drinks;
+                }*/
+
+            //region Orders
+
+                public synchronized List<Order> getOrdersList(String... whereClause) {
+                    SQLiteDatabase db = getReadableDatabase();
+                    List<Order> ordersList = new ArrayList<>();
+                    Cursor cursor;
+                    StringBuilder sqlQuery = getSqlQuery(TB_Orders, whereClause);
+
+                    cursor = db.rawQuery(sqlQuery.toString(), null);
+
+                    if (cursor.moveToFirst()) {
+                        do {
+                            Order order = new Order(cursor);
+                            ordersList.add(order);
+                        } while (cursor.moveToNext());
+                    }
+
+                    close(cursor, db);
+                    return ordersList;
+                }
+
             //endregion
+
+            public synchronized List<Orders_Tables> getOrderTablesList(String... whereClause) {
+                SQLiteDatabase db = getReadableDatabase();
+                List<Orders_Tables> TablesList = new ArrayList<>();
+                Cursor cursor;
+                StringBuilder sqlQuery = getSqlQuery(TB_Orders_Tables, whereClause);
+
+                cursor = db.rawQuery(sqlQuery.toString(), null);
+
+                if (cursor.moveToFirst()) {
+                    do {
+                        Orders_Tables table = new Orders_Tables(cursor);
+                        TablesList.add(table);
+                    } while (cursor.moveToNext());
+                }
+
+                close(cursor, db);
+                return TablesList;
+            }
+
+            public synchronized List<Orders_Drinks> getOrderDrinksList(String... whereClause) {
+                SQLiteDatabase db = getReadableDatabase();
+                List<Orders_Drinks> TablesList = new ArrayList<>();
+                Cursor cursor;
+                StringBuilder sqlQuery = getSqlQuery(TB_Orders_Drinks, whereClause);
+
+                cursor = db.rawQuery(sqlQuery.toString(), null);
+
+                if (cursor.moveToFirst()) {
+                    do {
+                        Orders_Drinks table = new Orders_Drinks(cursor);
+                        TablesList.add(table);
+                    } while (cursor.moveToNext());
+                }
+
+                close(cursor, db);
+                return TablesList;
+            }
 
     //endregion
 
@@ -234,14 +383,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             value.put(FLD_Table_ID, table.getID());
             value.put(FLD_Table_N_CHAIRS, table.getChairs());
 
+            String TABLE = TB_Tables;
+
             SQLiteDatabase db = getWritableDatabase();
             db.beginTransaction();
             try {
                 long rowCount;
-                rowCount = db.update(TB_Tables, value, "id='" + table.getID() + "'", null);
+                //Funzione per gestire stringhe in query senza preoccuparsi delle virgolette
+                //String waiterName = DatabaseUtils.sqlEscapeString(name);
+                rowCount = db.update(TABLE, value, FLD_Table_ID + " ='" + table.getID() + "'", null);
                 if (rowCount == 0) {
                     //Il device non esiste --> insert
-                    id = db.insertWithOnConflict(TB_Tables, null, value, SQLiteDatabase.CONFLICT_REPLACE);
+                    id = db.insertWithOnConflict(TABLE, null, value, SQLiteDatabase.CONFLICT_REPLACE);
                     /*if (id == -1) {
 
                     }*/
@@ -256,42 +409,175 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             return id;
         }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public synchronized long addOrUpdateWaiter(Waiter waiter) {
-        long id = 0;
-        ContentValues value = new ContentValues();
-        value.put(FLD_Waiter_ID, waiter.getID());
-        value.put(FLD_Waiter_NAME, waiter.getName());
-        value.put(FLD_Waiter_PASSWORD, waiter.getPassword());
-        value.put(FLD_Waiter_BORN, waiter.getBorn());
-        value.put(FLD_Waiter_BEGIN_WORKING, waiter.getBeginWorking());
-        value.put(FLD_Waiter_SALARY, waiter.getSalary());
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        public synchronized long addOrUpdateWaiter(Waiter waiter) {
+            long id = 0;
+            ContentValues value = new ContentValues();
+            value.put(FLD_Waiter_ID, waiter.getID());
+            value.put(FLD_Waiter_NAME, waiter.getName());
+            value.put(FLD_Waiter_PASSWORD, waiter.getPassword());
+            value.put(FLD_Waiter_BORN, waiter.getBorn());
+            value.put(FLD_Waiter_BEGIN_WORKING, waiter.getBeginWorking());
+            value.put(FLD_Waiter_SALARY, waiter.getSalary());
 
-        //id = addOrUpdateGeneric(TB_Waiters, value, waiter);
+            String TABLE = TB_Waiters;
 
-        SQLiteDatabase db = getWritableDatabase();
-        db.beginTransaction();
-        try {
-            long rowCount;
-            System.out.println("Checking id : " + waiter.getID());
-            rowCount = db.update(TB_Waiters, value, "id='" + waiter.getID() + "'", null);
-            if (rowCount == 0) {
-                //Il device non esiste --> insert
-                System.out.println("Adding : " + waiter.getName());
-                id = db.insertWithOnConflict(TB_Waiters, null, value, SQLiteDatabase.CONFLICT_REPLACE);
-                    /*if (id == -1) {
+            //id = addOrUpdateGeneric(TB_Waiters, value, waiter);
 
-                    }*/
+            SQLiteDatabase db = getWritableDatabase();
+            db.beginTransaction();
+            try {
+                long rowCount;
+                System.out.println("Checking id : " + waiter.getID());
+                rowCount = db.update(TABLE, value, FLD_Waiter_ID + " ='" + waiter.getID() + "'", null);
+                if (rowCount == 0) {
+                    //Il device non esiste --> insert
+                    System.out.println("Adding : " + waiter.getName());
+                    id = db.insertWithOnConflict(TABLE, null, value, SQLiteDatabase.CONFLICT_REPLACE);
+                        /*if (id == -1) {
+
+                        }*/
+                }
+            } catch (android.database.sqlite.SQLiteConstraintException ex) {
+                throw new SQLiteConstraintException();
+            } finally {
+                db.setTransactionSuccessful();
+                db.endTransaction();
+                close(db);
             }
-        } catch (android.database.sqlite.SQLiteConstraintException ex) {
-            throw new SQLiteConstraintException();
-        } finally {
-            db.setTransactionSuccessful();
-            db.endTransaction();
-            close(db);
+            return id;
         }
-        return id;
-    }
+
+        public synchronized long addOrUpdateDrink(Drink drink) {
+            long id = -1;
+            ContentValues value = new ContentValues();
+            value.put(FLD_Drink_ID, drink.getID());
+            value.put(FLD_Drink_NAME, drink.getName());
+            value.put(FLD_Drink_ALCOHOL, drink.getAlcohol());
+            value.put(FLD_Drink_PRICE, drink.getPrice());
+
+            String TABLE = TB_Drinks;
+
+            SQLiteDatabase db = getWritableDatabase();
+            db.beginTransaction();
+            try {
+                long rowCount;
+                //Funzione per gestire stringhe in query senza preoccuparsi delle virgolette
+                //String waiterName = DatabaseUtils.sqlEscapeString(name);
+                rowCount = db.update(TABLE, value, FLD_Drink_ID + " ='" + drink.getID() + "'", null);
+                if (rowCount == 0) {
+                    //Il device non esiste --> insert
+                    id = db.insertWithOnConflict(TABLE, null, value, SQLiteDatabase.CONFLICT_REPLACE);
+                        /*if (id == -1) {
+
+                        }*/
+                }
+            } catch (android.database.sqlite.SQLiteConstraintException ex) {
+                throw new SQLiteConstraintException();
+            } finally {
+                db.setTransactionSuccessful();
+                db.endTransaction();
+                close(db);
+            }
+            return id;
+        }
+
+        public synchronized long addOrUpdateOrder(Order order) {
+            long id = -1;
+            ContentValues value = new ContentValues();
+            value.put(FLD_Orders_ID, order.getID());
+            value.put(FLD_Orders_SERVED, order.getServed());
+            value.put(FLD_Orders_PAID, order.getPaid());
+
+            String TABLE = TB_Orders;
+
+            SQLiteDatabase db = getWritableDatabase();
+            db.beginTransaction();
+            try {
+                long rowCount;
+                //Funzione per gestire stringhe in query senza preoccuparsi delle virgolette
+                //String waiterName = DatabaseUtils.sqlEscapeString(name);
+                rowCount = db.update(TABLE, value, FLD_Orders_ID + " ='" + order.getID() + "'", null);
+                if (rowCount == 0) {
+                    //Il device non esiste --> insert
+                    id = db.insertWithOnConflict(TABLE, null, value, SQLiteDatabase.CONFLICT_REPLACE);
+                            /*if (id == -1) {
+
+                            }*/
+                }
+            } catch (android.database.sqlite.SQLiteConstraintException ex) {
+                throw new SQLiteConstraintException();
+            } finally {
+                db.setTransactionSuccessful();
+                db.endTransaction();
+                close(db);
+            }
+            return id;
+        }
+
+        public synchronized long addOrUpdateOrderTable(Orders_Tables order_table) {
+            long id = -1;
+            ContentValues value = new ContentValues();
+            value.put(FLD_Orders___Tables_FK_Order, order_table.getFkOrder());
+            value.put(FLD_Orders___Tables_FK_Table, order_table.getFkTable());
+
+            String TABLE = TB_Orders_Tables;
+
+            SQLiteDatabase db = getWritableDatabase();
+            db.beginTransaction();
+            try {
+                long rowCount;
+                //Funzione per gestire stringhe in query senza preoccuparsi delle virgolette
+                //String waiterName = DatabaseUtils.sqlEscapeString(name);
+                rowCount = db.update(TABLE, value, FLD_Orders___Tables_FK_Order + " ='" + order_table.getFkOrder() + "'", null);
+                if (rowCount == 0) {
+                    //Il device non esiste --> insert
+                    id = db.insertWithOnConflict(TABLE, null, value, SQLiteDatabase.CONFLICT_REPLACE);
+                                /*if (id == -1) {
+
+                                }*/
+                }
+            } catch (android.database.sqlite.SQLiteConstraintException ex) {
+                throw new SQLiteConstraintException();
+            } finally {
+                db.setTransactionSuccessful();
+                db.endTransaction();
+                close(db);
+            }
+            return id;
+        }
+
+        public synchronized long addOrUpdateOrderDrinks(Orders_Drinks order_drinks) {
+            long id = -1;
+            ContentValues value = new ContentValues();
+            value.put(FLD_Orders___Drinks_FK_Order, order_drinks.getFkOrder());
+            value.put(FLD_Orders___Drinks_FK_Drink, order_drinks.getFkDrink());
+
+            String TABLE = TB_Orders_Drinks;
+
+            SQLiteDatabase db = getWritableDatabase();
+            db.beginTransaction();
+            try {
+                long rowCount;
+                //Funzione per gestire stringhe in query senza preoccuparsi delle virgolette
+                //String waiterName = DatabaseUtils.sqlEscapeString(name);
+                rowCount = db.update(TABLE, value, FLD_Orders___Drinks_FK_Order + " ='" + order_drinks.getFkOrder() + "'", null);
+                if (rowCount == 0) {
+                    //Il device non esiste --> insert
+                    id = db.insertWithOnConflict(TABLE, null, value, SQLiteDatabase.CONFLICT_REPLACE);
+                                    /*if (id == -1) {
+
+                                    }*/
+                }
+            } catch (android.database.sqlite.SQLiteConstraintException ex) {
+                throw new SQLiteConstraintException();
+            } finally {
+                db.setTransactionSuccessful();
+                db.endTransaction();
+                close(db);
+            }
+            return id;
+        }
 
     //endregion
 
@@ -358,6 +644,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.execSQL(CREATE_TB_Orders_QUERY);
             db.execSQL(CREATE_TB_Orders___Drinks_QUERY);
             db.execSQL(CREATE_TB_Orders___Waiters_QUERY);
+            db.execSQL(CREATE_TB_Orders___Tables_QUERY);
             db.execSQL(CREATE_TB_Drinks_QUERY);
             db.execSQL(CREATE_TB_Waiters_QUERY);
         }catch (Exception e){

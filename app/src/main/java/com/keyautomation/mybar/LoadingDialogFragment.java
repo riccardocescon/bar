@@ -9,17 +9,16 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
-public class LoadingFragment extends DialogFragment {
+public class LoadingDialogFragment extends DialogFragment{
 
     public static final String WAIT_DIALOG_TAG = "wait_dialog_tag";
     TextView countdown;
@@ -34,9 +33,9 @@ public class LoadingFragment extends DialogFragment {
     Runnable loading_thread = new Runnable() {
         public void run() {
             int value = Integer.parseInt(countdown.getText().toString());
-            if(value <= 1)dismiss();
-            else{
-                countdown.setText( String.valueOf(value - 1));
+            if (value <= 1) dismiss();
+            else {
+                countdown.setText(String.valueOf(value - 1));
                 mHandler.postDelayed(loading_thread, 1000);
             }
         }
@@ -44,10 +43,10 @@ public class LoadingFragment extends DialogFragment {
 
     private Handler mHandler;
 
-    public static LoadingFragment getInstance(String title, DialogDismissListener dismissListener) {
-        LoadingFragment vDialog = new LoadingFragment();
+    public static LoadingDialogFragment getInstance(String title/*, DialogDismissListener dismissListener*/) {
+        LoadingDialogFragment vDialog = new LoadingDialogFragment();
         vDialog.title = title;
-        vDialog.dismissListener = dismissListener;
+        //vDialog.dismissListener = dismissListener;
         return vDialog;
     }
 
@@ -55,6 +54,14 @@ public class LoadingFragment extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        Log.d("context", String.valueOf(context));
+        if (context instanceof DialogDismissListener)
+            this.dismissListener = (DialogDismissListener) context;
     }
 
     @NonNull
@@ -82,8 +89,12 @@ public class LoadingFragment extends DialogFragment {
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
-
         mHandler.removeCallbacks(loading_thread);
+        if (dismissListener != null) {
+            Log.d("Arrived", String.valueOf(dismissListener));
+            dismissListener.onDialogDismiss();
+            LoginActivity.instance.loadOrdersActivity();
+        }
     }
 
 
