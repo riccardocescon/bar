@@ -83,6 +83,9 @@ public class LoginActivity extends AppCompatActivity implements LoadingDialogFra
         Orders_Drinks od4 = new Orders_Drinks(o2.getID(), d2.getID());
         Orders_Drinks od5 = new Orders_Drinks(o2.getID(), d1.getID());
 
+        Orders_Waiters ow1 = new Orders_Waiters(o1.getID(), primo.getID());
+        Orders_Waiters ow2 = new Orders_Waiters(o2.getID(), secondo.getID());
+
         DatabaseHelper.instance.addOrUpdateWaiter(primo);
         DatabaseHelper.instance.addOrUpdateWaiter(secondo);
 
@@ -103,7 +106,10 @@ public class LoginActivity extends AppCompatActivity implements LoadingDialogFra
         DatabaseHelper.instance.addOrUpdateOrderDrinks(od2);
         DatabaseHelper.instance.addOrUpdateOrderDrinks(od3);
         DatabaseHelper.instance.addOrUpdateOrderDrinks(od4);
-        DatabaseHelper.instance.addOrUpdateOrderDrinks(od5);*/
+        DatabaseHelper.instance.addOrUpdateOrderDrinks(od5);
+
+        DatabaseHelper.instance.addOrUpdateOrderWaiters(ow1);
+        DatabaseHelper.instance.addOrUpdateOrderWaiters(ow2);*/
 
 
         login_button.setOnClickListener(e ->{

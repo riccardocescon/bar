@@ -2,12 +2,14 @@ package com.keyautomation.mybar;
 
 import android.database.Cursor;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import androidx.annotation.RequiresApi;
 
 import java.util.Date;
 
-public class Waiter extends  AutoId{
+public class Waiter extends  AutoId implements Parcelable {
 
     private String name, password;
     private Date born, begin_working;
@@ -38,6 +40,35 @@ public class Waiter extends  AutoId{
             e.printStackTrace();
         }
     }
+
+    protected Waiter(Parcel in) {
+        super(in);
+        name = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int i) {
+        super.writeToParcel(dest);
+        dest.writeString(name);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Waiter> CREATOR = new Parcelable.Creator<Waiter>() {
+        @Override
+        public Waiter createFromParcel(Parcel in) {
+            return new Waiter(in);
+        }
+
+        @Override
+        public Waiter[] newArray(int size) {
+            return new Waiter[size];
+        }
+    };
 
     public String getName(){return name;}
     public String getPassword(){return password;}

@@ -1,12 +1,18 @@
 package com.keyautomation.mybar;
 
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Drink extends AutoId{
+import java.util.Objects;
+
+public class Drink extends AutoId implements Parcelable {
 
     private String name;
     private float alcohol;
     private float price;
+
+    private int quantity;
 
     public Drink(String name, float alcohol, float price){
         //load auto_id
@@ -16,6 +22,8 @@ public class Drink extends AutoId{
         this.name = name;
         this.alcohol = alcohol;
         this.price = price;
+
+        quantity = 1;
     }
 
     public Drink(Cursor cursor){
@@ -29,4 +37,65 @@ public class Drink extends AutoId{
     public float getAlcohol(){ return alcohol; }
     public float getPrice(){ return price; }
 
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void increaseQuantity() {
+        this.quantity++;
+    }
+
+    protected Drink(Parcel in) {
+        super(in);
+        name = in.readString();
+        alcohol = in.readFloat();
+        price = in.readFloat();
+        quantity = in.readInt();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int i) {
+        super.writeToParcel(dest);
+        dest.writeString(name);
+        dest.writeFloat(alcohol);
+        dest.writeFloat(price);
+        dest.writeInt(quantity);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Drink> CREATOR = new Parcelable.Creator<Drink>() {
+        @Override
+        public Drink createFromParcel(Parcel in) {
+            return new Drink(in);
+        }
+
+        @Override
+        public Drink[] newArray(int size) {
+            return new Drink[size];
+        }
+    };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Drink drink = (Drink) o;
+        return Float.compare(drink.alcohol, alcohol) == 0 &&
+                Float.compare(drink.price, price) == 0 &&
+                name.equals(drink.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, alcohol, price);
+    }
 }

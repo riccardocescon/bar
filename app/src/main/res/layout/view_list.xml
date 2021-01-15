@@ -8,9 +8,47 @@
         android:id="@+id/view_list_element"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/order_item_button"
+        android:layout_above="@+id/view_list_buttons_layout"
         tools:listitem="@layout/item_order"
         />
+
+    <RelativeLayout
+        android:id="@+id/view_list_buttons_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/order_item_button"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/view_list_Add_table"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Table"
+            android:layout_marginLeft="5dp"
+            android:layout_alignParentLeft="true"
+            />
+
+        <Button
+            android:id="@+id/view_list_Add_order"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Order"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@id/view_list_Add_table"
+            android:layout_toLeftOf="@id/view_list_Add_drink"
+            />
+
+        <Button
+            android:id="@+id/view_list_Add_drink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Drink"
+            android:layout_marginLeft="5dp"
+            android:layout_alignParentRight="true"
+            />
+
+
+    </RelativeLayout>
 
     <Button
         android:layout_width="match_parent"

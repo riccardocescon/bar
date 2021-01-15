@@ -54,12 +54,9 @@ public class ListViewAdapter extends BaseAdapter {
         }
 
         Order order = orders.get(position);
-        //String clasue = "id = " + order.getID();
 
-        //holder.n_table.setText("Table " + (DatabaseHelper.instance.getTableByOrder(clasue)).getID());
         holder.n_table.setText("Table " + order.getTableId());
 
-        //List<Drink> drinks = DatabaseHelper.instance.getDrinksByOrder(clasue);
         List<Drink> drinks = order.getDrinks();
         drinks.forEach(d -> Log.d("dringid", d.getName()));
         String elements = "";

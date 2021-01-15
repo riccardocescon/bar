@@ -9,7 +9,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MyBar">
-        <activity android:name=".OrdersActivity"></activity>
+        <activity android:name=".RegisterOrderAction"
+            android:parentActivityName=".OrdersActivity"></activity>
+        <activity android:name=".RegisterDrinkActivity" />
+        <activity android:name=".RegisterTable" />
+        <activity android:name=".OrdersActivity" />
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,6 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".OrderInfoActivity" />
     </application>
 
 </manifest>
