@@ -1,6 +1,7 @@
 package com.keyautomation.mybar;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;

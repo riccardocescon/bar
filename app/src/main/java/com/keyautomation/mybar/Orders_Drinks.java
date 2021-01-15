@@ -1,6 +1,7 @@
 package com.keyautomation.mybar;
 
 import android.database.Cursor;
+import android.util.Log;
 
 public class Orders_Drinks {
     private long fk_order;
@@ -9,12 +10,14 @@ public class Orders_Drinks {
     public Orders_Drinks(long fk_order, long fk_drink){
         this.fk_order = fk_order;
         this.fk_drink = fk_drink;
+
     }
 
     public Orders_Drinks(Cursor cursor) {
         try{
             fk_order = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.FLD_Orders___Drinks_FK_Order));
             fk_drink = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.FLD_Orders___Drinks_FK_Drink));
+            Log.d("FK_assigned", String.valueOf(fk_drink));
         }catch (Exception e){
             e.printStackTrace();
         }

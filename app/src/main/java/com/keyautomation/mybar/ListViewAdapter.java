@@ -20,6 +20,7 @@ public class ListViewAdapter extends BaseAdapter {
     public ListViewAdapter(Context context, List<Order> orders){
         mContext = (Activity)context;
         this.orders = orders;
+        this.orders.forEach(o -> Log.d("Orderid", String.valueOf(o.getID())));
     }
 
     @Override
