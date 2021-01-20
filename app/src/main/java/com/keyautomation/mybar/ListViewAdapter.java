@@ -20,7 +20,6 @@ public class ListViewAdapter extends BaseAdapter {
     public ListViewAdapter(Context context, List<Order> orders){
         mContext = (Activity)context;
         this.orders = orders;
-        this.orders.forEach(o -> Log.d("Orderid", String.valueOf(o.getID())));
     }
 
     @Override
@@ -54,11 +53,15 @@ public class ListViewAdapter extends BaseAdapter {
         }
 
         Order order = orders.get(position);
+        Log.d("OrderInfo", String.valueOf(order.getID()));
+        Log.d("OrderInfo", String.valueOf(order.getServed()));
+        Log.d("OrderInfo", String.valueOf(order.getTableId()));
+        Log.d("OrderInfo_pos", String.valueOf(position));
+        //if(order == null)return view;
 
         holder.n_table.setText("Table " + order.getTableId());
 
-        List<Drink> drinks = order.getDrinks();
-        drinks.forEach(d -> Log.d("dringid", d.getName()));
+        List<Drink> drinks = order.getDrinks();//get only drink of the same table
         String elements = "";
         if(drinks.size() < 3){
             for(int i = 0; i < drinks.size(); i++){

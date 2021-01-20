@@ -51,10 +51,25 @@
     </RelativeLayout>
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="130dp"
         android:layout_height="wrap_content"
         android:id="@+id/order_item_button"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="20dp"
+        android:text="Served"
+        />
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/order_item_paid"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/order_item_button"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:text="Paid"
         />
 
 </RelativeLayout>

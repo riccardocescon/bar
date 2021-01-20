@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.DatabaseUtils;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +28,8 @@ public class LoginActivity extends AppCompatActivity implements LoadingDialogFra
 
     private LoadingDialogFragment progressDialog;
 
+    private DatabaseHelper db;
+
     @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,30 +45,47 @@ public class LoginActivity extends AppCompatActivity implements LoadingDialogFra
 
         progressDialog = LoadingDialogFragment.getInstance("Loading");
 
-        //controlla database
-        Context c = this;
-        String db_name = DatabaseHelper.getDbName();
-        int version = DatabaseHelper.getDbVersion();
 
-        DatabaseHelper db = new DatabaseHelper(c, db_name, version);
+        loadDatabase();
 
-        List<Orders_Drinks> od = DatabaseHelper.instance.getOrderDrinksList();
-        od.forEach(o ->{
-            Log.d("od_fk_order", String.valueOf(o.getFkOrder()));
-            Log.d("od_fk_drink", String.valueOf(o.getFkDrink()));
-        });
+        if(DatabaseHelper.getInstance(this).getWaitersList().size() == 0) {
+            Waiter primo = new Waiter("tom", "psw", new Date(System.nanoTime()), new Date(System.nanoTime()), 100);
+            Waiter secondo = new Waiter("matt", "psw", new Date(System.nanoTime()), new Date(System.nanoTime()), 80);
 
-        /*Waiter primo = new Waiter("tom", "psw", new Date(System.nanoTime()), new Date(System.nanoTime()), 100);
-        Waiter secondo = new Waiter("matt", "psw", new Date(System.nanoTime()), new Date(System.nanoTime()), 80);
+            Table t1 = new Table(4);
+            Table t2 = new Table(3);
+            Table t3 = new Table(3);
+            Table t4 = new Table(3);
+            Table t5 = new Table(3);
+            Table t6 = new Table(3);
+            Table t7 = new Table(3);
+            Table t8 = new Table(3);
 
-        Table t1 = new Table(4);
-        Table t2 = new Table(3);
+            Drink d1 = new Drink("Red", 10, 3);
+            Drink d2 = new Drink("Dark", 8, 5);
+            Drink d3 = new Drink("Leffe", 9, 4);
 
-        Drink d1 = new Drink("Red", 10, 3);
-        Drink d2 = new Drink("Dark", 8, 5);
-        Drink d3 = new Drink("Leffe", 9, 4);
 
-        Order o1 = new Order(1,0);
+            DatabaseHelper.getInstance(this).addOrUpdateWaiter(primo);
+            DatabaseHelper.getInstance(this).addOrUpdateWaiter(secondo);
+
+            DatabaseHelper.getInstance(this).addOrUpdateTable(t1);
+            DatabaseHelper.getInstance(this).addOrUpdateTable(t2);
+            DatabaseHelper.getInstance(this).addOrUpdateTable(t3);
+            DatabaseHelper.getInstance(this).addOrUpdateTable(t4);
+            DatabaseHelper.getInstance(this).addOrUpdateTable(t5);
+            DatabaseHelper.getInstance(this).addOrUpdateTable(t6);
+            DatabaseHelper.getInstance(this).addOrUpdateTable(t7);
+            DatabaseHelper.getInstance(this).addOrUpdateTable(t8);
+
+            DatabaseHelper.getInstance(this).addOrUpdateDrink(d1);
+            DatabaseHelper.getInstance(this).addOrUpdateDrink(d2);
+            DatabaseHelper.getInstance(this).addOrUpdateDrink(d3);
+        }
+
+
+
+        /*Order o1 = new Order(1,0);
         o1.addDrink(d1);
         o1.addDrink(d2);
 
@@ -84,19 +104,9 @@ public class LoginActivity extends AppCompatActivity implements LoadingDialogFra
         Orders_Drinks od5 = new Orders_Drinks(o2.getID(), d1.getID());
 
         Orders_Waiters ow1 = new Orders_Waiters(o1.getID(), primo.getID());
-        Orders_Waiters ow2 = new Orders_Waiters(o2.getID(), secondo.getID());
+        Orders_Waiters ow2 = new Orders_Waiters(o2.getID(), secondo.getID());*/
 
-        DatabaseHelper.instance.addOrUpdateWaiter(primo);
-        DatabaseHelper.instance.addOrUpdateWaiter(secondo);
-
-        DatabaseHelper.instance.addOrUpdateTable(t1);
-        DatabaseHelper.instance.addOrUpdateTable(t2);
-
-        DatabaseHelper.instance.addOrUpdateDrink(d1);
-        DatabaseHelper.instance.addOrUpdateDrink(d2);
-        DatabaseHelper.instance.addOrUpdateDrink(d3);
-
-        DatabaseHelper.instance.addOrUpdateOrder(o1);
+       /* DatabaseHelper.instance.addOrUpdateOrder(o1);
         DatabaseHelper.instance.addOrUpdateOrder(o2);
 
         DatabaseHelper.instance.addOrUpdateOrderTable(ot1);
@@ -113,7 +123,15 @@ public class LoginActivity extends AppCompatActivity implements LoadingDialogFra
 
 
         login_button.setOnClickListener(e ->{
-            List<Waiter> waiters = DatabaseHelper.instance.getWaitersList("name = '" + nome.getText().toString() + "'");
+            List<Waiter> all = DatabaseHelper.getInstance(this).getWaitersList();
+            System.out.println("List : " + all.size());
+            all.forEach(wr ->{
+                System.out.println("Name : " + wr.getName());
+                System.out.println("pass : " + wr.getPassword());
+            });
+            String request = DatabaseUtils.sqlEscapeString(nome.getText().toString());
+            List<Waiter> waiters = DatabaseHelper.getInstance(this).getWaitersList("name = " + request);
+            System.out.println("Size : " + waiters.size());
             if(waiters.size() == 0){
                 printError("User does not exists");
                 return;
@@ -129,6 +147,15 @@ public class LoginActivity extends AppCompatActivity implements LoadingDialogFra
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    private void loadDatabase(){
+        Context c = this;
+        String db_name = DatabaseHelper.getDbName();
+        int version = DatabaseHelper.getDbVersion();
+
+        db = new DatabaseHelper(c, db_name, version);
+    }
+
     private void printError(String message){
         error_text.setVisibility(View.VISIBLE);
         error_text.setText(message);
@@ -136,6 +163,7 @@ public class LoginActivity extends AppCompatActivity implements LoadingDialogFra
 
     public void loadOrdersActivity(){
         Intent myIntent = new Intent(this, OrdersActivity.class);
+        db.close();
         Log.d("Loading : ", String.valueOf(myIntent));
         startActivity(myIntent);
     }

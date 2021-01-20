@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class OrderInfoActivity extends Activity {
 
@@ -30,11 +31,14 @@ public class OrderInfoActivity extends Activity {
         Waiter waiter = getIntent().getExtras().getParcelable("waiter");
         Order order = getIntent().getExtras().getParcelable("order");
         Log.d("Waiter name", waiter.getName());
-        ArrayList<Drink> drinks = getIntent().getParcelableArrayListExtra("drinks");
+        List<Drink> drinks = new ArrayList<>();//getIntent().getParcelableArrayListExtra("drinks");
+        drinks = compactList(order.getDrinks());
+
+        Button pay_button = findViewById(R.id.activity_order_info_button);
 
 
         listview = findViewById(R.id.view_list_element);
-        listview.setAdapter(mAdapter = new ItemInfoAdapter(this, drinks));
+        listview.setAdapter(mAdapter = new ItemInfoAdapter(this, drinks, order.getID()));
 
 
         TextView table_id = findViewById(R.id.activity_order_info_id);
@@ -50,5 +54,31 @@ public class OrderInfoActivity extends Activity {
 
         served_text.setText(order.getServed() == 1 ? "Served by " + waiter.getName() : "Not served yet");
 
+        pay_button.setOnClickListener(e ->{
+
+            order.setPaid(1);
+            DatabaseHelper.getInstance(this).addOrUpdateOrder(order);
+            Intent myIntent = new Intent(this, OrdersActivity.class);
+            startActivity(myIntent);
+
+        });
+
+    }
+
+    private List<Drink> compactList(List<Drink> list){
+        List<Drink> unique_drinks = new ArrayList<>();
+        for(Drink d : list){
+            if(!hasDrink(unique_drinks, d)){
+                unique_drinks.add(d);
+            }
+        }
+        return unique_drinks;
+    }
+
+    private boolean hasDrink(List<Drink> to_check, Drink drink){
+        for(Drink d : to_check){
+            if(d.getName().equals(drink.getName()))return true;
+        }
+        return false;
     }
 }

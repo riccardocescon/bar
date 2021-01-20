@@ -4,15 +4,12 @@ import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Table extends AutoId implements Parcelable {
+public class Table implements Parcelable {
 
+    private long id;
     private int n_chairs;
 
     public Table(int n_chairs){
-        super();
-        id = auto_table_id;
-        auto_table_id++;
-
         this.n_chairs = n_chairs;
     }
 
@@ -27,10 +24,11 @@ public class Table extends AutoId implements Parcelable {
     }
 
     public void setChairs(int n_chairs){this.n_chairs = n_chairs;}
+    public long getID(){ return id; }
     public int getChairs(){return n_chairs;}
 
     protected Table(Parcel in) {
-        super(in);
+        id = in.readLong();
         n_chairs = in.readInt();
     }
 
@@ -41,7 +39,7 @@ public class Table extends AutoId implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int i) {
-        super.writeToParcel(dest);
+        dest.writeLong(id);
         dest.writeInt(n_chairs);
     }
 

@@ -19,7 +19,7 @@ public class Orders_Drinks {
         try{
             fk_order = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.FLD_Orders___Drinks_FK_Order));
             fk_drink = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.FLD_Orders___Drinks_FK_Drink));
-            drink_amount = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.FLD_Orders___Drinks_FK_DRINK_AMOUNT));
+            //drink_amount = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.FLD_Orders___Drinks_FK_DRINK_AMOUNT));
         }catch (Exception e){
             e.printStackTrace();
         }

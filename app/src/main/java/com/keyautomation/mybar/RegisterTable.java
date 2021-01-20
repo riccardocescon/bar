@@ -20,11 +20,11 @@ public class RegisterTable extends AppCompatActivity {
         ImageView back_button = findViewById(R.id.activity_register_table_back);
 
         save_button.setOnClickListener(e ->{
-            if(value.getText() != null)return;
+            if(value.getText() == null)return;
             int num_chairs = Integer.parseInt(String.valueOf(value.getText()));
             if(num_chairs > 0){
                 Table table = new Table(num_chairs);
-                DatabaseHelper.instance.addOrUpdateTable(table);
+                DatabaseHelper.getInstance(this).addOrUpdateTable(table);
                 value.setText("");
             }else{
                 //print error

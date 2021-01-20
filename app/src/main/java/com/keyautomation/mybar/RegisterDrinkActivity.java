@@ -36,7 +36,7 @@ public class RegisterDrinkActivity extends AppCompatActivity {
 
             Drink drink = new Drink(String.valueOf(name.getText()), alchol_value, price_value);
 
-            DatabaseHelper.instance.addOrUpdateDrink(drink);
+            DatabaseHelper.getInstance(this).addOrUpdateDrink(drink);
 
             name.setText("");
             alcohol.setText("");

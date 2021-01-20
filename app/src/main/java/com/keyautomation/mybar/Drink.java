@@ -6,8 +6,9 @@ import android.os.Parcelable;
 
 import java.util.Objects;
 
-public class Drink extends AutoId implements Parcelable {
+public class Drink implements Parcelable {
 
+    private long id;
     private String name;
     private float alcohol;
     private float price;
@@ -15,10 +16,6 @@ public class Drink extends AutoId implements Parcelable {
     private int quantity;
 
     public Drink(String name, float alcohol, float price){
-        //load auto_id
-        id = auto_drink_id;
-        auto_drink_id++;
-
         this.name = name;
         this.alcohol = alcohol;
         this.price = price;
@@ -27,7 +24,7 @@ public class Drink extends AutoId implements Parcelable {
     }
 
     public Drink(Cursor cursor){
-        this.id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.FLD_Table_ID));
+        this.id = cursor.getLong(cursor.getColumnIndex(DatabaseHelper.FLD_Drink_ID));
         this.name = cursor.getString(cursor.getColumnIndex(DatabaseHelper.FLD_Drink_NAME));
         this.alcohol = cursor.getFloat(cursor.getColumnIndex(DatabaseHelper.FLD_Drink_ALCOHOL));
         this.price = cursor.getFloat(cursor.getColumnIndex(DatabaseHelper.FLD_Drink_PRICE));
@@ -36,21 +33,19 @@ public class Drink extends AutoId implements Parcelable {
     public String getName(){ return name; }
     public float getAlcohol(){ return alcohol; }
     public float getPrice(){ return price; }
+    public long getID(){return id;}
 
     public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 
     public void increaseQuantity() {
         this.quantity++;
     }
 
     protected Drink(Parcel in) {
-        super(in);
         name = in.readString();
         alcohol = in.readFloat();
         price = in.readFloat();
@@ -64,7 +59,6 @@ public class Drink extends AutoId implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int i) {
-        super.writeToParcel(dest);
         dest.writeString(name);
         dest.writeFloat(alcohol);
         dest.writeFloat(price);

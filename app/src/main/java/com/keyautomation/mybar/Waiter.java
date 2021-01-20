@@ -9,18 +9,13 @@ import androidx.annotation.RequiresApi;
 
 import java.util.Date;
 
-public class Waiter extends  AutoId implements Parcelable {
-
+public class Waiter implements Parcelable {
+    private long id;
     private String name, password;
     private Date born, begin_working;
     private float salary;
 
     public Waiter(String name, String password, Date born, Date begin_working, float salary){
-        //load auto_id
-        id = auto_waiter_id;
-        auto_waiter_id++;
-        System.out.println("waiter : " + name + " has id : " + id);
-
         this.name = name;
         this.password = password;
         this.born = born;
@@ -42,7 +37,7 @@ public class Waiter extends  AutoId implements Parcelable {
     }
 
     protected Waiter(Parcel in) {
-        super(in);
+        id = in.readLong();
         name = in.readString();
     }
 
@@ -53,7 +48,7 @@ public class Waiter extends  AutoId implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int i) {
-        super.writeToParcel(dest);
+        dest.writeLong(id);
         dest.writeString(name);
     }
 
@@ -77,5 +72,6 @@ public class Waiter extends  AutoId implements Parcelable {
     @RequiresApi(api = Build.VERSION_CODES.O)
     public long getBeginWorking(){return begin_working.toInstant().getEpochSecond();}
     public float getSalary(){return salary;}
+    public long getID(){return id;}
 
 }
